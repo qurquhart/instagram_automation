@@ -2,8 +2,8 @@ from instagram_tools import mountain_project_poster
 
 
 # credentials
-ig_username = "radclimbs"
-ig_password = "jkl1432l"
+ig_username = "username"
+ig_password = "password"
 
 # string conataining all hashtags
 hashtags = "#climbing #rockclimbing #climb #bouldering #climber #trad #sportclimbing #climbers " \
@@ -13,4 +13,4 @@ hashtags = "#climbing #rockclimbing #climb #bouldering #climber #trad #sportclim
            "#rockclimbinggear #chalkbags #boulderingtraining #boulderingislife"
 
 
-mountain_project_poster(ig_username, ig_password, hashtags)
+mountain_project_poster(ig_username, ig_password, hashtags, 'chromedriver.exe')

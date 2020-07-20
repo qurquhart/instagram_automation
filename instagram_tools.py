@@ -84,7 +84,7 @@ def insta_post(ig_username, ig_password, filepath, post_description, path_to_chr
 
 
 
-def mountain_project_poster(ig_username, ig_password, hashtags):
+def mountain_project_poster(ig_username, ig_password, hashtags, path_to_chromedriver):
     '''looks through stored route data, finds unposted route image,
     posts to instagram, and adds route_id to logfile'''
 
@@ -122,7 +122,7 @@ def mountain_project_poster(ig_username, ig_password, hashtags):
                         instagram_caption = f'{route_info_by_id(route_id)}' + \
                             '\r\n\r\n\r\n' + hashtags
                         insta_post(ig_username, ig_password,
-                                image, instagram_caption, 'chromedriver.exe')
+                                image, instagram_caption, path_to_chromedriver)
                         route_history.append(route_id)
                         posted = True
                         print(instagram_caption)
