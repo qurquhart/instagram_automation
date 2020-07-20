@@ -95,7 +95,7 @@ def mountain_project_poster(ig_username, ig_password, hashtags):
     f.close()
 
     route_history = []
-    # expand error reporting for unfound items
+    # expand error reporting for unfound items?
     if os.path.isfile("data/post_history.p"):
         route_history = pickle.load(open("data/post_history.p", "rb"))
 
