@@ -9,7 +9,7 @@ from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
-
+# from this project
 from mountain_project_tools import route_info_by_id
 
 
@@ -28,7 +28,8 @@ def insta_post(ig_username, ig_password, filepath, post_description):
             "userAgent": "Mozilla/5.0 (Linux; Android 4.2.1; en-us; Nexus 5 Build/JOP40D)"
             " AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19"}
         chrome_options = Options()
-        chrome_options.add_experimental_option("mobileEmulation", mobile_emulation)
+        chrome_options.add_experimental_option(
+            "mobileEmulation", mobile_emulation)
 
         driver = webdriver.Chrome(
             'chromedriver.exe', chrome_options=chrome_options)
@@ -115,12 +116,12 @@ def mountain_project_poster(ig_username, ig_password, hashtags):
                 # upload to instagram and add id to route history
 
                 # try:
-                    
+
                 image = os.path.abspath(f'images/{route_id}.jpg')
                 instagram_caption = f'{route_info_by_id(route_id)}' + \
                     '\r\n\r\n\r\n' + hashtags
                 insta_post(ig_username, ig_password,
-                            image, instagram_caption)
+                           image, instagram_caption)
                 route_history.append(route_id)
                 print(instagram_caption)
 
