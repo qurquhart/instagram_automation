@@ -8,7 +8,7 @@ mountain_project_api(
     distance="200",
     # difficulty 5.x to 5.x - abcd suffix
     min_difficulty="5.6",
-    max_difficulty="5.10",
+    max_difficulty="5.14",
     # results total
     results="500",
     # api key
