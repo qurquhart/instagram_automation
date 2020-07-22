@@ -26,9 +26,11 @@ def insta_post(ig_username, ig_password, filepath, post_description, path_to_chr
         "userAgent": "Mozilla/5.0 (Linux; Android 4.2.1; en-us; Nexus 5 Build/JOP40D)"
         " AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19"}
     chrome_options = Options()
-    chrome_options.add_argument("--headless")
+    # chrome_options.add_argument('--headless')
     chrome_options.add_experimental_option(
         "mobileEmulation", mobile_emulation)
+    
+    chrome_options.add_argument("--incognito")
 
     driver = webdriver.Chrome(
         path_to_chromedriver, chrome_options=chrome_options)
@@ -78,10 +80,21 @@ def insta_post(ig_username, ig_password, filepath, post_description, path_to_chr
     txt.send_keys(post_description)  # Descrition
     txt.send_keys(Keys.ENTER)
 
+    loading_time()
+    loading_time()
+
     # submit button
     driver.find_element_by_xpath(
         """//*[@id="react-root"]/section/div[1]/header/div/div[2]/button""").click()
 
+    loading_time()
+    loading_time()
+    loading_time()
+    loading_time()
+    loading_time()
+    loading_time()
+
+    driver.quit()
 
 
 def mountain_project_poster(ig_username, ig_password, hashtags, path_to_chromedriver):
@@ -103,18 +116,23 @@ def mountain_project_poster(ig_username, ig_password, hashtags, path_to_chromedr
 
     skipped_routes = 0
 
-    posted = False
+    posted = 0
 
-    if posted is False:
-        for route in route_info["routes"]:
-            # clean this up
-            route_id = route["id"]
+    print(f'pre ifelse - posted = {posted}')
+    for route in route_info["routes"]:
+        # clean this up
+        route_id = route["id"]
+        if posted == 0:
             if route_id not in route_history:
 
                 images_not_found = 0
+                
                 if not os.path.isfile(f"images/{route_id}.jpg"):
                     images_not_found += 1
+
                 else:
+
+                    print(f'before post stage - posted = {posted}')
                     # upload to instagram and add id to route history
                     try:
 
@@ -123,9 +141,12 @@ def mountain_project_poster(ig_username, ig_password, hashtags, path_to_chromedr
                             '\r\n\r\n\r\n' + hashtags
                         insta_post(ig_username, ig_password,
                                 image, instagram_caption, path_to_chromedriver)
+                        print('!!!!!!!!!! ITEM HAS POSTED !!!!!!!!!!!!')
                         route_history.append(route_id)
-                        posted = True
-                        print(instagram_caption)
+                        f = open('post_log.txt', 'a+')
+                        f.write(f'{datetime.now()} - [{ig_username}] Posted route ID: {route_id}\r\n')
+                        f.close()
+                        posted = 1
 
                     except Exception as ex:
                         f = open('post_log.txt', 'a+')
@@ -135,7 +156,8 @@ def mountain_project_poster(ig_username, ig_password, hashtags, path_to_chromedr
                         continue
 
                     # save post history
-                    pickle.dump(route_history, open("data/post_history.p", "wb"))
+                    pickle.dump(route_history, open(
+                        "data/post_history.p", "wb"))
 
             else:
                 skipped_routes += 1
@@ -149,3 +171,17 @@ def mountain_project_poster(ig_username, ig_password, hashtags, path_to_chromedr
     f.close()
     print(f'Routes in post history: {skipped_routes}'
           f' - Attempted posts on routes with unavailable images: {images_not_found}')
+
+
+def remove_from_history(route_id):
+    route_history = pickle.load(open("data/post_history.p", "rb"))
+    route_history.remove(route_id)
+    pickle.dump(route_history, open("data/post_history.p", "wb"))
+    print(f"[Post History] Removed route ID: {route_id}")
+
+
+def add_to_history(route_id):
+    route_history = pickle.load(open("data/post_history.p", "rb"))
+    route_history.append(route_id)
+    pickle.dump(route_history, open("data/post_history.p", "wb"))
+    print(f"[Post History] Added route ID: {route_id}")
