@@ -8,7 +8,7 @@ def mountain_project_api(latitude, longitude, distance, min_difficulty, max_diff
     url = f"https://www.mountainproject.com/data/get-routes-for-lat-lon?lat={latitude}"\
           f"&lon={longitude}&maxDistance={distance}&minDiff={min_difficulty}"\
           f"&maxDiff={max_difficulty}&maxResults={results}&key={api_key}"
-    
+
     # write file, creating directory if not present
     os.makedirs(os.path.dirname('data/'), exist_ok=True)
     f = open('data/route_info.json', 'wb')
@@ -42,27 +42,33 @@ def pull_image(image_name, image_url, file_extension):
 def pull_all_images():
     '''pulls all images from json'''
     # open file
-    f = open('data/route_info.json', 'r')
-    data = json.load(f)
-
-    # download each file
-    duplicate_image = 0
-    print('Download initiated.')
-    for route in data["routes"]:
-        route_id = route["id"]
-        # search for file exists 
-        # add try except
-        if os.path.isfile(f"images/{route_id}.jpg"):
-            duplicate_image += 1
-        else:           
-            try:
-                pull_image(image_name=route_id, image_url=route["imgMedium"], file_extension=".jpg")
-            except Exception:
-                print(f'Failed to download image. Route ID: {route_id}')
-    if duplicate_image is not 0:
-        if duplicate_image is 1:
-            print(f'Download complete. {duplicate_image} image already present.')
-        else:
-            print(f'Download complete. {duplicate_image} images already present.')
+    if not os.path.isfile("data/route_info.json"):
+        print("[ERROR] Mountain project data not found.  Try running mountain_project_api() first.")
     else:
-        print('Download complete.')
+        f = open('data/route_info.json', 'r')
+        data = json.load(f)
+
+        # download each file
+        duplicate_image = 0
+        print('Download initiated.')
+        for route in data["routes"]:
+            route_id = route["id"]
+            # search for file exists
+            # add try except
+            if os.path.isfile(f"images/{route_id}.jpg"):
+                duplicate_image += 1
+            else:
+                try:
+                    pull_image(image_name=route_id,
+                            image_url=route["imgMedium"], file_extension=".jpg")
+                except Exception:
+                    print(f'Failed to download image. Route ID: {route_id}')
+        if duplicate_image is not 0:
+            if duplicate_image is 1:
+                print(
+                    f'Download complete. {duplicate_image} image already present.')
+            else:
+                print(
+                    f'Download complete. {duplicate_image} images already present.')
+        else:
+            print('Download complete.')
