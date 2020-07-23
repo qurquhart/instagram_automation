@@ -13,7 +13,7 @@ from selenium.webdriver.common.keys import Keys
 from mountain_project_tools import route_info_by_id
 
 
-def insta_post(ig_username, ig_password, filepath, post_description, path_to_chromedriver):
+def insta_post(ig_username, ig_password, image_filepath, ig_caption, path_to_chromedriver):
     '''post to instagram using selenium/chrome'''
 
     def loading_time():
@@ -59,11 +59,11 @@ def insta_post(ig_username, ig_password, filepath, post_description, path_to_chr
     # set filelocation for image upload and open
     handle = "[CLASS:#32770; TITLE:Open]"
     autoit.win_wait(handle, 3)
-    autoit.control_set_text(handle, "Edit1", filepath)
+    autoit.control_set_text(handle, "Edit1", image_filepath)
     autoit.control_click(handle, "Button1")
 
     # logging
-    print(f"Uploading {filepath}")
+    print(f"Uploading {image_filepath}")
 
     loading_time()
 
@@ -77,7 +77,7 @@ def insta_post(ig_username, ig_password, filepath, post_description, path_to_chr
     txt = driver.find_element_by_class_name('_472V_')
     txt.send_keys('')
     txt = driver.find_element_by_class_name('_472V_')
-    txt.send_keys(post_description)  # Descrition
+    txt.send_keys(ig_caption)  # Descrition
     txt.send_keys(Keys.ENTER)
 
     loading_time()
