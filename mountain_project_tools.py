@@ -58,30 +58,39 @@ def load_route_info():
 
 def pull_all_images():
     '''pulls all images from json'''
+
+    log=Logger('activity_log.txt', 'pull_all_images')
+    error=Logger('error_log.txt', 'pull_all_images')
+
     # open file
     data = load_route_info()
 
     # download each file
     duplicate_image = 0
-    print('Download initiated.')
+
+    log.text('Download initiated.')
+    
     for route in data["routes"]:
+
         route_id = route["id"]
-        # search for file exists
-        # add try except
+
         if os.path.isfile(f"images/{route_id}.jpg"):
             duplicate_image += 1
+
         else:
             try:
                 pull_image(image_name=route_id,
                         image_url=route["imgMedium"], file_extension=".jpg")
             except Exception:
-                print(f'Failed to download image. Route ID: {route_id}')
+                error.text(f'Failed to download image. Route ID: {route_id}')
+
     if duplicate_image is not 0:
         if duplicate_image is 1:
-            print(
+            log.text(
                 f'Download complete. {duplicate_image} image already present.')
         else:
-            print(
+            log.text(
                 f'Download complete. {duplicate_image} images already present.')
+
     else:
-        print('Download complete.')
+        log.text('Download complete.')

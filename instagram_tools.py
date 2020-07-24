@@ -175,20 +175,20 @@ def mountain_project_poster(ig_username, ig_password, hashtags, path_to_chromedr
 
                         # save post history pickle
 
-                        def write_route_history():
-                            pickle.dump(route_history, open(
+                        def write_route_history(route_history_list):
+                            pickle.dump(route_history_list, open(
                                 "data/post_history.p", "wb+"))
-                            log.text('Wrote route history to disk.')
+                            log.text('Route history saved to disk.')
 
                         # check for directory and save
                         if os.path.isdir('data/'):
-                            write_route_history()
+                            write_route_history(route_history)
                         else:
                             # create directory
                             os.makedirs(os.path.dirname(
                                 'data/'), exist_ok=True)
                             log.text('Data directory not found, creating now.')
-                            write_route_history()
+                            write_route_history(route_history)
 
                 else:
                     # for logging how many routes in history
@@ -202,19 +202,76 @@ def mountain_project_poster(ig_username, ig_password, hashtags, path_to_chromedr
 
 
 def remove_from_history(route_id):
+    log = Logger('activity_log.txt','remove_from_history')
+    error = Logger('error_log.txt', 'remove_from_history')
+
+    # open file and remove route id from list
     route_history = pickle.load(open("data/post_history.p", "rb"))
     route_history.remove(route_id)
-    pickle.dump(route_history, open("data/post_history.p", "wb"))
-    print(f"[Post History] Removed route ID: {route_id}")
+    log.text(f"Removed route ID: {route_id}")
+
+    def write_route_history(route_history_list):
+        pickle.dump(route_history_list, open("data/post_history.p", "wb+"))
+        log.text('Route history saved to disk.')
+
+    try:
+        # check for directory and save
+        if os.path.isdir('data/'):
+            write_route_history(route_history)
+        else:
+            # create directory
+            os.makedirs(os.path.dirname('data/'), exist_ok=True)
+            log.text('Data directory not found, creating now.')
+            write_route_history(route_history)
+    except Exception as ex:
+        error.text(f'Failed to save route history: {ex}')
 
 
 def add_to_history(route_id):
+    log = Logger('activity_log.txt','add_to_history')
+    error = Logger('error_log.txt', 'add_to_history')
+
     route_history = pickle.load(open("data/post_history.p", "rb"))
     route_history.append(route_id)
-    pickle.dump(route_history, open("data/post_history.p", "wb"))
-    print(f"[Post History] Added route ID: {route_id}")
+    log.text(f"Added route ID: {route_id}")
+
+    def write_route_history(route_history_list):
+        pickle.dump(route_history_list, open("data/post_history.p", "wb+"))
+        log.text('Route history saved to disk.')
+
+    try:
+        # check for directory and save
+        if os.path.isdir('data/'):
+            write_route_history(route_history)
+        else:
+            # create directory
+            os.makedirs(os.path.dirname('data/'), exist_ok=True)
+            log.text('Data directory not found, creating now.')
+            write_route_history(route_history)
+    except Exception as ex:
+        error.text(f'Failed to save route history: {ex}')
 
 
 def reset_post_history():
+    log = Logger('activity_log.txt','reset_post_history')
+    error = Logger('error_log.txt', 'reset_post_history')
+
     route_history = []
-    pickle.dump(route_history, open("post_history.p", "wb"))
+    log.text('Cleared route history.')
+
+    def write_route_history(route_history_list):
+        pickle.dump(route_history_list, open("data/post_history.p", "wb+"))
+        log.text('Route history saved to disk.')
+
+    try:
+        # check for directory and save
+        if os.path.isdir('data/'):
+            write_route_history(route_history)
+        else:
+            # create directory
+            os.makedirs(os.path.dirname('data/'), exist_ok=True)
+            log.text('Data directory not found, creating now.')
+            write_route_history(route_history)
+    except Exception as ex:
+        error.text(f'Failed to save route history: {ex}')
+
