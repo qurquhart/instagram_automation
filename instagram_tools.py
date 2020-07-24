@@ -1,7 +1,5 @@
 import os
 import pickle
-from datetime import datetime
-import json
 # insta_post() - selenium/time/autoit
 import time
 import autoit
@@ -10,11 +8,14 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 # from this project
-from mountain_project_tools import route_info_by_id
+from mountain_project_tools import route_info_by_id, load_route_info
+from logger import Logger
 
 
 def insta_post(ig_username, ig_password, image_filepath, ig_caption, path_to_chromedriver):
     '''post to instagram using selenium/chrome'''
+
+    log = Logger('activity_log.txt', f'insta_post ] [ {ig_username}')
 
     def loading_time():
         '''wait for the page to load'''
@@ -29,14 +30,14 @@ def insta_post(ig_username, ig_password, image_filepath, ig_caption, path_to_chr
     # chrome_options.add_argument('--headless')
     chrome_options.add_experimental_option(
         "mobileEmulation", mobile_emulation)
-    
-    chrome_options.add_argument("--incognito")
 
     driver = webdriver.Chrome(
         path_to_chromedriver, chrome_options=chrome_options)
 
     # navigate to login page and input credentials
     driver.get('https://www.instagram.com/accounts/login/')
+
+    log.text('Initialized chromedriver.')
 
     loading_time()
 
@@ -52,6 +53,8 @@ def insta_post(ig_username, ig_password, image_filepath, ig_caption, path_to_chr
     # go to profile page
     driver.get('https://www.instagram.com/' + ig_username)
 
+    log.text('Logged in an navigated to profile page.')
+
     # init new post
     ActionChains(driver).move_to_element(driver.find_element_by_xpath(
         """//*[@id="react-root"]/section/nav[2]/div/div/div[2]/div/div/div[3]""")).click().perform()
@@ -63,7 +66,7 @@ def insta_post(ig_username, ig_password, image_filepath, ig_caption, path_to_chr
     autoit.control_click(handle, "Button1")
 
     # logging
-    print(f"Uploading {image_filepath}")
+    log.text('Uploaded image to instagram.')
 
     loading_time()
 
@@ -87,6 +90,8 @@ def insta_post(ig_username, ig_password, image_filepath, ig_caption, path_to_chr
     driver.find_element_by_xpath(
         """//*[@id="react-root"]/section/div[1]/header/div/div[2]/button""").click()
 
+    log.text('Posted image to instagram.')
+
     loading_time()
     loading_time()
     loading_time()
@@ -96,81 +101,104 @@ def insta_post(ig_username, ig_password, image_filepath, ig_caption, path_to_chr
 
     driver.quit()
 
+    log.text('Quit chromedriver.')
+
 
 def mountain_project_poster(ig_username, ig_password, hashtags, path_to_chromedriver):
     '''looks through stored route data, finds unposted route image,
     posts to instagram, and adds route_id to logfile'''
 
-    f = open('post_log.txt', 'a+')
-    f.write(
-        f'{datetime.now()} - [{ig_username}] Initiated mountain project poster.\r\n')
-    f.close()
+    log = Logger('activity_log.txt',
+                 f'mountain_project_poster ] [ {ig_username}')
+    error = Logger('error_log.txt',
+                   f'mountain_project_poster ] [ {ig_username}')
+
+    log.text('Initialized mountain project poster.')
 
     route_history = []
     # expand error reporting for unfound items?
     if os.path.isfile("data/post_history.p"):
         route_history = pickle.load(open("data/post_history.p", "rb"))
+        log.text('Loaded post history.')
+    else:
+        log.text('Post history not found, continuing with empty history.')
 
     # load route info
-    route_info = json.load(open('data/route_info.json', 'r'))
+    route_info = False
+
+    route_info = load_route_info()
 
     skipped_routes = 0
 
     posted = 0
 
-    print(f'pre ifelse - posted = {posted}')
-    for route in route_info["routes"]:
-        # clean this up
-        route_id = route["id"]
-        if posted == 0:
-            if route_id not in route_history:
+    if route_info is False:
+        error.text('Route info not found')
+    else:
+        for route in route_info["routes"]:
+            route_id = route["id"]
+            if not posted == 0:
+                log.text('Image posted.')
+            else:
+                if route_id not in route_history:
 
-                images_not_found = 0
-                
-                if not os.path.isfile(f"images/{route_id}.jpg"):
-                    images_not_found += 1
+                    images_not_found = 0
+
+                    if not os.path.isfile(f"images/{route_id}.jpg"):
+                        images_not_found += 1
+
+                    else:
+                        # upload to instagram and add id to route history
+                        try:
+
+                            image = os.path.abspath(f'images/{route_id}.jpg')
+                            instagram_caption = f'{route_info_by_id(route_id)}' + \
+                                '\r\n\r\n\r\n' + hashtags
+
+                            log.text(
+                                f'Attempting to post route ID: {route_id}')
+
+                            insta_post(ig_username, ig_password,
+                                       image, instagram_caption, path_to_chromedriver)
+
+                            route_history.append(route_id)
+
+                            log.text(
+                                f'Adding route to history, route ID: {route_id}')
+
+                            posted = 1
+
+                        except Exception as ex:
+                            error.text(
+                                f'Unable to post route ID {route_id}: {ex}')
+                            continue
+
+                        # save post history pickle
+
+                        def write_route_history():
+                            pickle.dump(route_history, open(
+                                "data/post_history.p", "wb+"))
+                            log.text('Wrote route history to disk.')
+
+                        # check for directory and save
+                        if os.path.isdir('data/'):
+                            write_route_history()
+                        else:
+                            # create directory
+                            os.makedirs(os.path.dirname(
+                                'data/'), exist_ok=True)
+                            log.text('Data directory not found, creating now.')
+                            write_route_history()
 
                 else:
-
-                    print(f'before post stage - posted = {posted}')
-                    # upload to instagram and add id to route history
-                    try:
-
-                        image = os.path.abspath(f'images/{route_id}.jpg')
-                        instagram_caption = f'{route_info_by_id(route_id)}' + \
-                            '\r\n\r\n\r\n' + hashtags
-                        insta_post(ig_username, ig_password,
-                                image, instagram_caption, path_to_chromedriver)
-                        print('!!!!!!!!!! ITEM HAS POSTED !!!!!!!!!!!!')
-                        route_history.append(route_id)
-                        f = open('post_log.txt', 'a+')
-                        f.write(f'{datetime.now()} - [{ig_username}] Posted route ID: {route_id}\r\n')
-                        f.close()
-                        posted = 1
-
-                    except Exception as ex:
-                        f = open('post_log.txt', 'a+')
-                        f.write(
-                            f'{datetime.now()} - ERROR! UNABLE TO POST ROUTE ID {route_id}: {ex}\r\n')
-                        f.close()
-                        continue
-
-                    # save post history
-                    pickle.dump(route_history, open(
-                        "data/post_history.p", "wb"))
-
-            else:
-                skipped_routes += 1
+                    # for logging how many routes in history
+                    skipped_routes += 1
 
     if images_not_found != 0:
-        print(f'{images_not_found} attempted image files were not found.')
+        log.text(f'{images_not_found} attempted image files were not found.')
 
-    f = open('post_log.txt', 'a+')
-    f.write(f'{datetime.now()} - [{ig_username}] Routes in post history: {skipped_routes}'
-            f' - Attempted posts on routes with unavailable images: {images_not_found}\r\n')
-    f.close()
-    print(f'Routes in post history: {skipped_routes}'
-          f' - Attempted posts on routes with unavailable images: {images_not_found}')
+    log.text(f'Routes in post history: {skipped_routes}'
+             f' - Attempted posts on routes with unavailable images: {images_not_found}')
 
 
 def remove_from_history(route_id):
@@ -185,3 +213,8 @@ def add_to_history(route_id):
     route_history.append(route_id)
     pickle.dump(route_history, open("data/post_history.p", "wb"))
     print(f"[Post History] Added route ID: {route_id}")
+
+
+def reset_post_history():
+    route_history = []
+    pickle.dump(route_history, open("post_history.p", "wb"))
