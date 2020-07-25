@@ -15,7 +15,7 @@ from logger import Logger
 def insta_post(ig_username, ig_password, image_filepath, ig_caption, path_to_chromedriver):
     '''post to instagram using selenium/chrome'''
 
-    log = Logger('activity_log.txt', f'insta_post ] [ {ig_username}')
+    log = Logger('activity_log.txt', f'insta_post] [{ig_username}')
 
     def loading_time():
         '''wait for the page to load'''
@@ -53,7 +53,7 @@ def insta_post(ig_username, ig_password, image_filepath, ig_caption, path_to_chr
     # go to profile page
     driver.get('https://www.instagram.com/' + ig_username)
 
-    log.text('Logged in an navigated to profile page.')
+    log.text('Logged in and navigated to profile page.')
 
     # init new post
     ActionChains(driver).move_to_element(driver.find_element_by_xpath(
@@ -109,9 +109,9 @@ def mountain_project_poster(ig_username, ig_password, hashtags, path_to_chromedr
     posts to instagram, and adds route_id to logfile'''
 
     log = Logger('activity_log.txt',
-                 f'mountain_project_poster ] [ {ig_username}')
+                 f'mountain_project_poster] [{ig_username}')
     error = Logger('error_log.txt',
-                   f'mountain_project_poster ] [ {ig_username}')
+                   f'mountain_project_poster] [{ig_username}')
 
     log.text('Initialized mountain project poster.')
 
@@ -138,7 +138,7 @@ def mountain_project_poster(ig_username, ig_password, hashtags, path_to_chromedr
         for route in route_info["routes"]:
             route_id = route["id"]
             if not posted == 0:
-                log.text('Image posted.')
+                break
             else:
                 if route_id not in route_history:
 
@@ -197,8 +197,8 @@ def mountain_project_poster(ig_username, ig_password, hashtags, path_to_chromedr
     if images_not_found != 0:
         log.text(f'{images_not_found} attempted image files were not found.')
 
-    log.text(f'Routes in post history: {skipped_routes}'
-             f' - Attempted posts on routes with unavailable images: {images_not_found}')
+    log.text(f'Routes in post history: {skipped_routes}')
+    log.text(f'Attempted posts on routes with unavailable images: {images_not_found}')
 
 
 def remove_from_history(route_id):
